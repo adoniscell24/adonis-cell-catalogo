@@ -11,7 +11,7 @@
 <header><h1>ADONIS <span>CELL</span></h1><p>Estilo, calidad y confianza</p><p>Catálogo digital de productos</p></header>
 <main class="wrap">
 <section class="panel"><h2>Encuentra tu producto</h2><div class="filters"><input id="search" placeholder="Buscar producto..."><select id="status"><option value="">Todos los estados</option><option value="true">Disponible</option><option value="false">Agotado</option></select></div><button style="margin-top:12px" onclick="clearFilters()">Limpiar filtros</button></section>
-<div class="bar"><span id="count">Cargando productos...</span><button onclick="toggleAdmin()">⚙ Administrar</button></div>
+<div class="bar"><span id="count">Cargando productos...</span><button id="adminBtn" style="display:none" onclick="toggleAdmin()">⚙ Administrar</button></div>
 <section class="panel admin" id="admin"><h2>Administración de productos</h2>
 <div id="loginBox" class="login"><p>Acceso exclusivo del administrador.</p><form id="loginForm"><input id="email" type="email" autocomplete="username" placeholder="Correo electrónico" required style="margin-bottom:10px"><input id="password" type="password" autocomplete="current-password" placeholder="Contraseña" required style="margin-bottom:10px"><button type="submit">Iniciar sesión</button></form></div>
 <div id="editorBox" class="hidden"><p id="userLabel" class="note"></p><button style="max-width:200px;margin-bottom:15px" onclick="logout()">Cerrar sesión</button><form id="productForm" class="form"><input id="name" placeholder="Nombre del producto" required><input id="price" type="number" min="0.01" step="0.01" placeholder="Precio en RD$" required><input id="img" type="url" placeholder="URL pública de imagen (opcional)"> <input id="fotoArchivo" type="file" accept="image/*"><select id="available"><option value="true">Disponible</option><option value="false">Agotado</option></select><textarea id="description" placeholder="Descripción" rows="3"></textarea><button id="save" type="submit">Agregar producto</button><button type="button" style="background:#64748b" onclick="resetForm()">Cancelar edición</button></form></div>
@@ -43,6 +43,11 @@ function toggleAdmin() {
   }
 }
 
+  if (new URLSearchParams(window.location.search).get('admin') === '1') {
+  window.addEventListener('DOMContentLoaded', () => {
+    toggleAdmin();
+  });
+}
 
 function clearFilters(){$('search').value='';$('status').value='';render()}
 function updateAuthUI(){$('loginBox').classList.toggle('hidden',isAdmin());$('editorBox').classList.toggle('hidden',!isAdmin());$('userLabel').textContent=isAdmin()?'Sesión de administrador: '+session.user.email:'';render()}
