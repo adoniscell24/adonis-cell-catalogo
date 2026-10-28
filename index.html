@@ -33,19 +33,17 @@ function isAdmin(){return session?.user?.id===ADMIN_UID}
 function showMessage(s){$('adminMessage').textContent=s}
 function render(){const q=$('search').value.trim().toLowerCase(),status=$('status').value;const filtered=products.filter(p=>(String(p.nombre||'')+' '+String(p.descripcion||'')).toLowerCase().includes(q)&&(!status||String(p.disponible)===status));$('count').textContent=filtered.length+' producto(s) encontrado(s)';$('products').innerHTML=filtered.length?filtered.map(p=>{const img=p.imagen_url?`<img src="${esc(p.imagen_url)}" alt="${esc(p.nombre)}" loading="lazy" onerror="this.replaceWith(document.createTextNode('Sin imagen'))">`:'📱 Imagen pendiente';return `<article class="item"><div class="photo">${img}</div><div class="details"><h3>${esc(p.nombre)}</h3><p class="muted">${esc(p.descripcion)}</p><span class="tag ${p.disponible?'':'off'}">${p.disponible?'Disponible':'Agotado'}</span><div class="price">RD$ ${Number(p.precio||0).toLocaleString('es-DO')}</div><button class="wa" data-action="consult" data-id="${esc(p.id)}">Consultar por WhatsApp</button>${isAdmin()?`<div class="actions"><button data-action="edit" data-id="${esc(p.id)}">Editar</button><button class="danger" data-action="delete" data-id="${esc(p.id)}">Eliminar</button></div>`:''}</div></article>`}).join(''):'<p class="empty">No hay productos que coincidan.</p>'}
 async function loadProducts(){const {data,error}=await db.from('productos').select('id,nombre,precio,imagen_url,disponible,descripcion').order('id',{ascending:false});if(error){$('count').textContent='No se pudieron cargar los productos';$('products').innerHTML='<p class="empty">Error al consultar el catálogo. Revisa la conexión y las políticas de lectura.</p>';console.error(error);return}products=data||[];render()}
-function toggleAdmin(){
-  if (!isAdmin()) {
-    $('loginBox').classList.remove('hidden');
-    showMessage('Inicia sesión como administrador.');
-    return;
-  }
 
+function toggleAdmin() {
   $('admin').classList.toggle('open');
 
   if ($('admin').classList.contains('open')) {
-    $('admin').scrollIntoView({behavior:'smooth'});
+    $('admin').scrollIntoView({ behavior: 'smooth' });
+    updateAuthUI();
   }
 }
+
+
 function clearFilters(){$('search').value='';$('status').value='';render()}
 function updateAuthUI(){$('loginBox').classList.toggle('hidden',isAdmin());$('editorBox').classList.toggle('hidden',!isAdmin());$('userLabel').textContent=isAdmin()?'Sesión de administrador: '+session.user.email:'';render()}
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();showMessage('Iniciando sesión...');const {data,error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});$('password').value='';if(error){showMessage('No se pudo iniciar sesión: '+error.message);return}session=data.session;if(!isAdmin()){await db.auth.signOut();session=null;showMessage('Esta cuenta no tiene permiso de administración.');updateAuthUI();return}showMessage('Sesión iniciada.');updateAuthUI()});
